@@ -16,6 +16,9 @@ RUN echo android-sdk-installer android-sdk-installer/accepted-android-sdk-eula b
 RUN apt-get update && apt-get install -y \
   android-sdk-installer
 
+RUN apt-get install -y \
+  git
+
 RUN curl http://maven.jenkins-ci.org/content/repositories/releases/org/jenkins-ci/plugins/swarm-client/2.0/swarm-client-2.0-jar-with-dependencies.jar > /swarm-client-jar-with-dependencies.jar
 
 ENTRYPOINT ["java","-jar", "/swarm-client-jar-with-dependencies.jar"]

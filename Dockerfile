@@ -15,4 +15,4 @@ WORKDIR /ansible
 RUN ansible-playbook playbook.yml -c local 
 
 WORKDIR /
-ENTRYPOINT ["xvfb-run","java","-jar", "/opt/swarm-client-jar-with-dependencies.jar"]
+ENTRYPOINT ["xvfb-run","-e", "/dev/stdout", "java","-jar", "/opt/swarm-client-jar-with-dependencies.jar"]

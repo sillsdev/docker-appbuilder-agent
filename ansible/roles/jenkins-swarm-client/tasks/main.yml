@@ -1,0 +1,10 @@
+---
+
+- name: Install Packages
+  apt: pkg={{ item }} state=latest
+  with_items:
+    - curl
+    - openjdk-7-jre-headless
+
+- name: Pull the Jenkins swarm client jar
+  shell: curl http://maven.jenkins-ci.org/content/repositories/releases/org/jenkins-ci/plugins/swarm-client/2.0/swarm-client-2.0-jar-with-dependencies.jar > /opt/swarm-client-jar-with-dependencies.jar

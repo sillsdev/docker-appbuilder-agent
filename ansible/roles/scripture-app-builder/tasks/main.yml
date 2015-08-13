@@ -1,22 +1,7 @@
 ---
 
-- name: Add gpg key for packages.sil.org
-  apt_key: url="http://packages.sil.org/sil.gpg"
-
-- name: Add packages.sil.org
-  apt_repository: repo="{{ item }}"
-                  state=present
-                  update_cache=yes
-  with_items:
-    - "deb http://packages.sil.org/ubuntu trusty main"
-    - "deb http://packages.sil.org/ubuntu trusty-experimental main"
-
 - name: Configure dpkg to install i386 packages
   shell: dpkg --add-architecture i386 && apt-get update
-
-- name: Install scripture-app-builder
-  apt: pkg=scripture-app-builder
-       state=present
 
 - name: Preseed dpkg for android-sdk-installer
   shell: echo android-sdk-installer android-sdk-installer/accepted-android-sdk-eula boolean true | debconf-set-selections -v
@@ -25,6 +10,6 @@
   apt: pkg=android-sdk-installer
        state=present
 
-- name: Install xvfb for scripture-app-builder
-  apt: pkg=xvfb
+- name: Install scripture-app-builder
+  apt: pkg=scripture-app-builder
        state=present

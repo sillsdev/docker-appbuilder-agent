@@ -3,6 +3,7 @@
   sudo: True
   gather_facts: False
   roles:
+    - sil-software
     - scripture-app-builder
     - jenkins-swarm-client
   tasks:

@@ -1,0 +1,12 @@
+---
+
+- name: Add gpg key for packages.sil.org
+  apt_key: url="http://packages.sil.org/sil.gpg"
+
+- name: Add packages.sil.org
+  apt_repository: repo="{{ item }}"
+                  state=present
+                  update_cache=yes
+  with_items:
+    - "deb http://packages.sil.org/ubuntu trusty main"
+    - "deb http://packages.sil.org/ubuntu trusty-experimental main"

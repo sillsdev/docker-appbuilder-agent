@@ -12,7 +12,7 @@
     - "deb http://packages.sil.org/ubuntu trusty-experimental main"
 
 - name: Configure dpkg to install i386 packages
-  shell: dpkg --add-architecture i386
+  shell: dpkg --add-architecture i386 && apt-get update
 
 - name: Install scripture-app-builder
   apt: pkg=scripture-app-builder

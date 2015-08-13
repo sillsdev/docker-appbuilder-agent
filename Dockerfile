@@ -14,5 +14,7 @@ WORKDIR /ansible
 
 RUN ansible-playbook playbook.yml -c local 
 
+COPY start-services.sh /usr/local/bin/start-services.sh
+
 WORKDIR /
-ENTRYPOINT ["xvfb-run","java","-jar", "/opt/swarm-client-jar-with-dependencies.jar"]
+ENTRYPOINT ["start-services.sh"]

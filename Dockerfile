@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y\
   python-apt\
   python-pycurl
 
-RUN curl -o /usr/local/bin/whenavail https://bitbucket.org/silintl/docker-whenavail/raw/master/whenavail 
-RUN chmod a+x /usr/local/bin/whenavail
+RUN curl -o /usr/local/bin/whenurlavail https://bitbucket.org/silintl/docker-whenavail/raw/master/whenurlavail 
+RUN chmod a+x /usr/local/bin/whenurlavail
 
 # Must configure the default inventory file
 RUN echo local > /etc/ansible/hosts

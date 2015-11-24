@@ -21,7 +21,7 @@ esac
 done
 
 if [ -n "$URL" ]; then
-whenurlavail "${URL}/plugin/swarm/slaveInfo" 10 0 java -jar /opt/swarm-client-jar-with-dependencies.jar -labels "android-sdk app-builders" "$@"
-else
-java -jar /opt/swarm-client-jar-with-dependencies.jar -labels "android-sdk app-builders" "$@"
+whenurlavail "${URL}/plugin/swarm/slaveInfo" 10 0 echo "Sleeping 30 seconds" && sleep 30
 fi
+
+java -jar /opt/swarm-client-jar-with-dependencies.jar -labels "android-sdk app-builders" "$@"

@@ -1,0 +1,23 @@
+---
+
+- name: Install Packages
+  apt: pkg={{ item }} state=latest
+  with_items:
+    - ruby2.0
+    - ruby2.0-dev
+    - build-essential
+
+- name: Divert Ruby 1.9.x
+  command: dpkg-divert --add --rename --divert /usr/bin/{{ item }}.divert /usr/bin/{{ item }}
+  with_items:
+    - ruby
+    - gem
+
+- name: Update Alternative to Ruby 2.0
+  command: update-alternatives --install /usr/bin/{{ item }} {{ item }} /usr/bin/{{ item }}2.0 1
+  with_items:
+    - ruby
+    - gem
+
+- name: Install Gem Supply
+  command: gem install supply

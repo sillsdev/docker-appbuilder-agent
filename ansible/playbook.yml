@@ -3,6 +3,7 @@
   sudo: True
   gather_facts: False
   roles:
+    - fastlane-supply
     - sil-software
     - scripture-app-builder
     - jenkins-swarm-client

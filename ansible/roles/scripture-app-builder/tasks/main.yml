@@ -1,15 +1,12 @@
 ---
-
 - name: Configure dpkg to install i386 packages
-  shell: dpkg --add-architecture i386 && apt-get update
+  shell: dpkg --add-architecture i386
 
 - name: Preseed dpkg for android-sdk-installer
   shell: echo android-sdk-installer android-sdk-installer/accepted-android-sdk-eula boolean true | debconf-set-selections -v
 
-- name: Install android-sdk-installer
-  apt: pkg=android-sdk-installer
-       state=present
-
-- name: Install scripture-app-builder
-  apt: pkg=scripture-app-builder
-       state=present
+- name: Install packages
+  apt: pkg={{ item }} state=latest update_cache=yes
+  with_items:
+    - android-sdk-installer
+    - scripture-app-builder

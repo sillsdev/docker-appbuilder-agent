@@ -1,7 +1,7 @@
 ---
 
 - name: Install Packages
-  apt: pkg={{ item }} state=latest
+  apt: pkg={{ item }} update_cache=yes state=latest
   with_items:
     - ruby2.0
     - ruby2.0-dev
@@ -19,5 +19,5 @@
     - ruby
     - gem
 
-- name: Install Gem Supply
-  command: gem install supply
+- name: Install Supply
+  gem: name=supply state=latest

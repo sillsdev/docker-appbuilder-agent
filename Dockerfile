@@ -1,5 +1,5 @@
-FROM silintl/ubuntu:14.04
-MAINTAINER <Peter Kohler> "peter_kohler@sil.org"
+FROM phusion/baseimage
+MAINTAINER <Chris Hubbard> "chris_hubbard@sil.org"
 
 RUN apt-get update && apt-get install -y\
   ansible\
@@ -20,4 +20,5 @@ RUN ansible-playbook playbook.yml -c local
 COPY start-services.sh /usr/local/bin/start-services.sh
 
 WORKDIR /
-ENTRYPOINT ["start-services.sh"]
+#ENTRYPOINT ["start-services.sh"]
+ENTRYPOINT ["/sbin/my_init", "--", "start-services.sh"]

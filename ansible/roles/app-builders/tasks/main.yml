@@ -10,3 +10,4 @@
   with_items:
     - android-sdk-installer
     - scripture-app-builder
+    - reading-app-builder

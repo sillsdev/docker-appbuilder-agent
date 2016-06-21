@@ -3,10 +3,10 @@
   sudo: True
   gather_facts: False
   roles:
-#    - fastlane-supply
+    - fastlane-supply
     - sil-software
     - app-builders
-#    - jenkins-swarm-client
+    - jenkins-swarm-client
   tasks:
     - name: Install other packages for the agent
       apt: pkg="{{ item }}" state=present

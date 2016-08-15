@@ -3,6 +3,7 @@
   sudo: True
   gather_facts: False
   roles:
+    - ruby-2.0
     - fastlane-supply
     - sil-software
     - app-builders

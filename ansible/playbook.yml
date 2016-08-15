@@ -5,6 +5,7 @@
   roles:
     - ruby-2.0
     - fastlane-supply
+    - bloom-app-maker
     - sil-software
     - app-builders
     - jenkins-swarm-client

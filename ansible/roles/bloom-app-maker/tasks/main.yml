@@ -1,0 +1,11 @@
+---
+- name: Install bloom-app-maker native dependencies
+  apt: pkg={{ item }} state=latest update_cache=yes
+  with_items:
+    - build-essential
+    - patch
+    - zlib1g-dev
+    - liblzma-dev
+
+- name: Install nokogiri
+  gem: name=nokogiri state=latest user_install=no

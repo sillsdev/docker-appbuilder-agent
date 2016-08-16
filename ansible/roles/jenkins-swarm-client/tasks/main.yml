@@ -7,4 +7,4 @@
     - xvfb
 
 - name: Pull the Jenkins swarm client jar
-  get_url: url=http://maven.jenkins-ci.org/content/repositories/releases/org/jenkins-ci/plugins/swarm-client/2.0/swarm-client-2.0-jar-with-dependencies.jar dest=/opt/swarm-client-jar-with-dependencies.jar
+  get_url: url=https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/2.0/swarm-client-2.0-jar-with-dependencies.jar dest=/opt/swarm-client-jar-with-dependencies.jar validate_certs=no

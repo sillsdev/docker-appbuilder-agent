@@ -9,6 +9,7 @@
     - sil-software
     - app-builders
     - jenkins-swarm-client
+    - bloom-desktop
   tasks:
     - name: Install other packages for the agent
       apt: pkg="{{ item }}" state=present

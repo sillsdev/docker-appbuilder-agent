@@ -3,6 +3,9 @@
 - name: Add gpg key for packages.sil.org
   apt_key: url="http://packages.sil.org/sil.gpg"
 
+- name: Add gpg key fpr linux.lsdev.sil.org
+  apt_key: url="http://linux.lsdev.sil.org/downloads/sil-testing.gpg"
+
 - name: Add packages.sil.org
   apt_repository: repo="{{ item }}"
                   state=present
@@ -10,3 +13,5 @@
   with_items:
     - "deb http://packages.sil.org/ubuntu trusty main"
     - "deb http://packages.sil.org/ubuntu trusty-experimental main"
+    - "deb http://linux.lsdev.sil.org/ubuntu trusty main"
+    - "deb http://linux.lsdev.sil.org/ubuntu trusty-experimental main"

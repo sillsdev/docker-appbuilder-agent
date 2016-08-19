@@ -7,5 +7,8 @@
     - zlib1g-dev
     - liblzma-dev
 
-- name: Install nokogiri
-  gem: name=nokogiri state=latest user_install=no
+- name: Install Gems
+  gem: name={{ item }} state=latest user_install=no
+  with_items:
+    - nokogiri
+    - bundler

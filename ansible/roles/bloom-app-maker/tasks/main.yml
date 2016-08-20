@@ -12,3 +12,4 @@
   with_items:
     - nokogiri
     - bundler
+    - bundle

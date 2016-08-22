@@ -6,6 +6,7 @@
     - patch
     - zlib1g-dev
     - liblzma-dev
+    - libmagickwand-dev
 
 - name: Install Gems
   gem: name={{ item }} state=latest user_install=no

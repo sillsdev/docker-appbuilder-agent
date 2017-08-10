@@ -1,4 +1,4 @@
 ---
 
-- name: Install Supply
-  gem: name=supply state=latest user_install=no
+- name: Install Fastlane
+  gem: name=fastlane state=latest user_install=no

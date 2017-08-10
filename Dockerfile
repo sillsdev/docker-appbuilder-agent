@@ -1,4 +1,4 @@
-FROM phusion/baseimage:0.9.18
+FROM phusion/baseimage:0.9.22
 MAINTAINER <Chris Hubbard> "chris_hubbard@sil.org"
 
 RUN apt-get update && apt-get install -y\

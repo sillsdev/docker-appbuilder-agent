@@ -1,6 +1,5 @@
 ---
 - hosts: 127.0.0.1
-  sudo: True
   gather_facts: False
   roles:
     - ruby-2.0

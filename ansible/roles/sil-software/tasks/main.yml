@@ -8,5 +8,5 @@
                   state=present
                   update_cache=yes
   with_items:
-    - "deb http://packages.sil.org/ubuntu trusty main"
-    - "deb http://packages.sil.org/ubuntu trusty-experimental main"
+    - "deb http://packages.sil.org/ubuntu xenial main"
+    - "deb http://packages.sil.org/ubuntu xenial-experimental main"

@@ -1,0 +1,10 @@
+---
+
+- name: Download PIP
+  get_url: url=https://bootstrap.pypa.io/get-pip.py dest=/tmp/get-pip.py
+
+- name: Install PIP
+  script: /tmp/get-pip.py --user
+
+- name: Install awscli
+  script: /root/.local/bin/pip install awscli --upgrade --user

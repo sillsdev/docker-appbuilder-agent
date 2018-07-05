@@ -22,3 +22,6 @@ COPY start-services.sh /usr/local/bin/start-services.sh
 WORKDIR /
 #ENTRYPOINT ["start-services.sh"]
 ENTRYPOINT ["/sbin/my_init", "--", "start-services.sh"]
+
+# Clean up when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/*.* /App \Builder/* /tmp/App\ Builder/*

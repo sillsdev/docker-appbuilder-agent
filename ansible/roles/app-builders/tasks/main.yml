@@ -12,3 +12,14 @@
     - scripture-app-builder
     - reading-app-builder
     - dictionary-app-builder
+
+- name: Copy files for priming build files
+  copy: src={{ item }} dest=/tmp/{{ item }}
+  with_items:
+    - keystore_prime.keystore
+    - keystore_prime.txt
+    - eng-web_usfm.zip
+    - about.txt
+
+- name: Prime gradle cache with build
+  shell: scripture-app-builder -new -n web -p org.ebible -b /tmp/eng-web_usfm.zip -ks /tmp/keystore_prime.keystore -i /tmp/keystore_prime.txt -a /tmp/about.txt -ic /usr/share/scripture-app-builder/images/icons/ab-001-black-144.png -ic /usr/share/scripture-app-builder/images/icons/ab-001-black-72.png -build

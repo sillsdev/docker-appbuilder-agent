@@ -1,0 +1,11 @@
+dist: trusty
+
+jobs:
+  include:
+    - stage: build docker image
+      script:
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - docker build -t travis-ci-build-appbuilder-agent .
+      - docker images
+      - docker tag travis-ci-build-appbuilder-agent $DOCKER_USERNAME/appbuilder-agent
+      - docker push $DOCKER_USERNAME/appbuilder-agent

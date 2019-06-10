@@ -7,7 +7,7 @@ jobs:
       script:
       - if [[ "$TRAVIS_BRANCH" = "develop" ]]; then export DOCKER_TAG="staging"; else export DOCKER_TAG="production"; fi
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      - docker build -t travis-ci-build-appbuilder-agent .
+      - travis_wait 30 docker build -t travis-ci-build-appbuilder-agent .
       - docker images
       - docker tag travis-ci-build-appbuilder-agent "$DOCKER_USERNAME/appbuilder-agent:$DOCKER_TAG"
       - docker push "$DOCKER_USERNAME/appbuilder-agent:$DOCKER_TAG"

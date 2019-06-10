@@ -9,5 +9,5 @@ jobs:
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - travis_wait 30 docker build -t travis-ci-build-appbuilder-agent .
       - docker images
-      - docker tag travis-ci-build-appbuilder-agent "$DOCKER_USERNAME/appbuilder-agent:$DOCKER_TAG"
-      - docker push "$DOCKER_USERNAME/appbuilder-agent:$DOCKER_TAG"
+      - docker tag travis-ci-build-appbuilder-agent "sillsdev/appbuilder-agent:$DOCKER_TAG"
+      - docker push "sillsdev/appbuilder-agent:$DOCKER_TAG"

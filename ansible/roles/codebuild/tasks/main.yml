@@ -7,4 +7,4 @@
   script: /tmp/get-pip.py --user
 
 - name: Install awscli
-  script: /root/.local/bin/pip install awscli --upgrade --user
+  script: /root/.local/bin/pip install awscli --upgrade 

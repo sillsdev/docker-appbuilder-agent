@@ -9,9 +9,7 @@
   apt: pkg={{ item }} state=latest update_cache=yes
   with_items:
     - android-sdk-installer
-    - scripture-app-builder
-    - reading-app-builder
-    - dictionary-app-builder
+    - app-builders
 
 - name: Copy files for priming build files
   copy: src={{ item }} dest=/tmp/{{ item }}
@@ -22,4 +20,4 @@
     - about.txt
 
 - name: Prime gradle cache with build
-  shell: scripture-app-builder -new -n web -p org.ebible -b /tmp/eng-web_usfm.zip -ks /tmp/keystore_prime.keystore -i /tmp/keystore_prime.txt -a /tmp/about.txt -ic /usr/share/scripture-app-builder/images/icons/sab/A0-001-black/ab-001-black-144.png -ic /usr/share/scripture-app-builder/images/icons/sab/A0-001-black/ab-001-black-72.png -build
+  shell: scripture-app-builder -new -n web -p org.ebible -b /tmp/eng-web_usfm.zip -ks /tmp/keystore_prime.keystore -i /tmp/keystore_prime.txt -a /tmp/about.txt -ic /usr/share/app-builders/images/icons/sab/A0-001-black/ab-001-black-144.png -ic /usr/share/app-builders/images/icons/sab/A0-001-black/ab-001-black-72.png -build 

@@ -6,9 +6,10 @@
 - name: Add gpg key for linux.lsdev.sil.org
   apt_key: url="http://linux.lsdev.sil.org/downloads/sil-testing.gpg"
   
-- name: Add packages.sil.org
+- name: Add repositories
   apt_repository: repo="{{ item }}"
                   state=present
                   update_cache=yes
   with_items:
-    - "deb http://packages.sil.org/ubuntu xenial main"
+    - "deb http://packages.sil.org/ubuntu bionic main"
+    - "deb http://linux.lsdev.sil.org/ubuntu bionic main"

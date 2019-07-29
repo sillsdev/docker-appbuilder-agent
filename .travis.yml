@@ -3,9 +3,10 @@ dist: trusty
 jobs:
   include:
     - stage: build docker image
-      if: branch IN (develop, master) AND type IN (push, api)
+      if: branch IN (develop, master, refactor) AND type IN (push, api)
       script:
-      - if [[ "$TRAVIS_BRANCH" = "develop" ]]; then export DOCKER_TAG="staging"; else export DOCKER_TAG="production"; fi
+      - case $TRAVIS_BRANCH in develop) DOCKER_TAG="staging" ;; master) DOCKER_TAG="production" ;; *) DOCKER_TAG=$TRAVIS_BRANCH ;; esac
+      - echo "DOCKER_TAG=$DOCKER_TAG"
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - travis_wait 30 docker build -t travis-ci-build-appbuilder-agent .
       - docker images

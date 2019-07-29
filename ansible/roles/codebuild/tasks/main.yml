@@ -4,7 +4,7 @@
   get_url: url=https://bootstrap.pypa.io/get-pip.py dest=/tmp/get-pip.py
 
 - name: Install PIP
-  script: /tmp/get-pip.py --user
+  script: /tmp/get-pip.py
 
 - name: Install awscli
-  script: /root/.local/bin/pip install awscli --upgrade 
+  script: /usr/local/bin/pip install awscli --upgrade 

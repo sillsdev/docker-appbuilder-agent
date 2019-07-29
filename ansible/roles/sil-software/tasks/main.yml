@@ -3,8 +3,8 @@
 - name: Add gpg key for packages.sil.org
   apt_key: url="http://packages.sil.org/sil.gpg"
 
-- name: Add gpg key for linux.lsdev.sil.org
-  apt_key: url="http://linux.lsdev.sil.org/downloads/sil-testing.gpg"
+#- name: Add gpg key for linux.lsdev.sil.org
+#  apt_key: url="http://linux.lsdev.sil.org/downloads/sil-testing.gpg"
   
 - name: Add repositories
   apt_repository: repo="{{ item }}"
@@ -12,4 +12,4 @@
                   update_cache=yes
   with_items:
     - "deb http://packages.sil.org/ubuntu bionic main"
-    - "deb http://linux.lsdev.sil.org/ubuntu bionic main"
+    # - "deb http://linux.lsdev.sil.org/ubuntu bionic main"

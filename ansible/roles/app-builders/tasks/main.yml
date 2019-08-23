@@ -18,6 +18,8 @@
     - keystore_prime.txt
     - eng-web_usfm.zip
     - about.txt
+    - ab-001-black-144.png
+    - ab-001-black-72.png
 
 - name: Prime gradle cache with build
-  shell: scripture-app-builder -new -n web -p org.ebible -b /tmp/eng-web_usfm.zip -ks /tmp/keystore_prime.keystore -i /tmp/keystore_prime.txt -a /tmp/about.txt -ic /usr/share/app-builders/images/icons/sab/A0-001-black/ab-001-black-144.png -ic /usr/share/app-builders/images/icons/sab/A0-001-black/ab-001-black-72.png -build 
+  shell: scripture-app-builder -new -n web -p org.ebible -b /tmp/eng-web_usfm.zip -ks /tmp/keystore_prime.keystore -i /tmp/keystore_prime.txt -a /tmp/about.txt -ic /tmp/ab-001-black-144.png -ic /tmp/ab-001-black-72.png -build 

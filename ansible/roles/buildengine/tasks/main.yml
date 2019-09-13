@@ -4,3 +4,4 @@
   apt: pkg={{ item }} state=latest update_cache=yes
   with_items:
     - libxml2-utils
+    - jq

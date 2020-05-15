@@ -7,4 +7,16 @@
   script: /tmp/get-pip.py
 
 - name: Install awscli
-  script: /usr/local/bin/pip install awscli --upgrade 
+  script: /usr/local/bin/pip install awscli --upgrade
+
+- name: Download rclone
+  get_url:
+    url: https://rclone.org/install.sh
+    dest: /tmp/install-rclone.sh
+    mode: 777
+
+- name: Install rclone
+  shell: /tmp/install-rclone.sh
+  args:
+    creates: /usr/bin/rclone
+    executable: bash

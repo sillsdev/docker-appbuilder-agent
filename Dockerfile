@@ -4,7 +4,8 @@ MAINTAINER <Chris Hubbard> "chris_hubbard@sil.org"
 RUN apt-get update && apt-get install -y\
   ansible\
   python-apt\
-  python-pycurl
+  python-pycurl \
+  busybox
 
 # Must configure the default inventory file
 RUN echo local > /etc/ansible/hosts

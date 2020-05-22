@@ -1,0 +1,33 @@
+---
+
+- name: Download nodesource APT repo script
+  get_url:
+    url:  https://deb.nodesource.com/setup_14.x
+    dest: /tmp/setup-node-apt-source.sh
+    mode: 777
+
+- name:  Setup nodesoure APT repo
+  shell: /tmp/setup-node-apt-source.sh
+  args:
+    creates: /etc/apt/sources.list.d/nodesource.list
+    executable: bash
+    
+- name: Install NodeJs
+  apt: pkg=nodejs state=latest update_cache=yes
+  
+- name: Install Workbox-CLI
+  npm:
+    name: workbox-cli
+    global: yes
+
+- name: Download rclone install script
+  get_url:
+    url: https://rclone.org/install.sh
+    dest: /tmp/install-rclone.sh
+    mode: 777
+
+- name: Install rclone
+  shell: /tmp/install-rclone.sh
+  args:
+    creates: /usr/bin/rclone
+    executable: bash

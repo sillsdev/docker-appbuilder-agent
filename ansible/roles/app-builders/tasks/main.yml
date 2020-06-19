@@ -11,8 +11,13 @@
     - android-sdk-installer
     - app-builders
 
+- name: Make directory for files
+  file:
+    path: /root/prime
+    state: directory
+
 - name: Copy files for priming build files
-  copy: src={{ item }} dest=/tmp/{{ item }}
+  copy: src={{ item }} dest=/root/prime/{{ item }}
   with_items:
     - keystore_prime.keystore
     - keystore_prime.txt
@@ -21,5 +26,5 @@
     - ab-001-black-144.png
     - ab-001-black-72.png
 
-- name: Prime gradle cache with build
-  shell: scripture-app-builder -new -n web -p org.ebible -b /tmp/eng-web_usfm.zip -ks /tmp/keystore_prime.keystore -i /tmp/keystore_prime.txt -a /tmp/about.txt -ic /tmp/ab-001-black-144.png -ic /tmp/ab-001-black-72.png -build 
+#- name: Prime gradle cache with build
+#  shell: scripture-app-builder -new -n web -p org.ebible -b /root/prime/eng-web_usfm.zip -ks /root/prime/keystore_prime.keystore -i /root/prime/keystore_prime.txt -a /root/prime/about.txt -ic /root/prime/ab-001-black-144.png -ic /root/prime/ab-001-black-72.png -build 

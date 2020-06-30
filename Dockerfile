@@ -15,5 +15,5 @@ WORKDIR /ansible
 
 RUN ansible-playbook playbook.yml -c local 
 
-# Clean up when done.
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/*.* /App \Builder/* /tmp/App\ Builder/*
+# Clean up when done. (Preserve 'App Projects' directory!)
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/*.* /App \Builder/Scripture\ Apps/App\ Projects/* /tmp/App\ Builder/*

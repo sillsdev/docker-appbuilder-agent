@@ -3,12 +3,14 @@ dist: trusty
 jobs:
   include:
     - stage: build docker image
-      if: branch IN (develop, master, refactor) AND type IN (push, api)
+      if: branch IN (develop, master, refactor, aws-ecr) AND type IN (push, api)
       script:
       - case $TRAVIS_BRANCH in develop) DOCKER_TAG="staging" ;; master) DOCKER_TAG="production" ;; *) DOCKER_TAG=$TRAVIS_BRANCH ;; esac
       - echo "DOCKER_TAG=$DOCKER_TAG"
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      #- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - pip install --user awscli
+      - eval $(aws ecr get-login --no-include-email --region $AWS_REGION) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env
       - travis_wait 30 docker build -t travis-ci-build-appbuilder-agent .
       - docker images
-      - docker tag travis-ci-build-appbuilder-agent "sillsdev/appbuilder-agent:$DOCKER_TAG"
-      - docker push "sillsdev/appbuilder-agent:$DOCKER_TAG"
+      - docker tag travis-ci-build-appbuilder-agent "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent:$DOCKER_TAG"
+      - docker push "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent:$DOCKER_TAG"

@@ -7,10 +7,15 @@ jobs:
       script:
       - case $TRAVIS_BRANCH in develop) DOCKER_TAG="staging" ;; master) DOCKER_TAG="production" ;; *) DOCKER_TAG=$TRAVIS_BRANCH ;; esac
       - echo "DOCKER_TAG=$DOCKER_TAG"
-      #- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - pip install --user awscli
-      - eval $(aws ecr get-login --no-include-email --region $AWS_REGION) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env
       - travis_wait 30 docker build -t travis-ci-build-appbuilder-agent .
       - docker images
+      - eval $(aws ecr get-login --no-include-email --region $AWS_REGION) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env
       - docker tag travis-ci-build-appbuilder-agent "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent:$DOCKER_TAG"
       - docker push "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent:$DOCKER_TAG"
+      - # push to FCBH as well
+      - export AWS_ACCESS_KEY_ID=$FCBH_AWS_ACCESS_KEY_ID
+      - export AWS_SECRET_ACCESS_KEY=$FCBH_AWS_SECRET_ACCESS_KEY
+      - eval $(aws ecr get-login --no-include-email --region $FCBH_AWS_REGION)
+      - docker tag travis-ci-build-appbuilder-agent "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent:$DOCKER_TAG"
+      - docker push "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent:$DOCKER_TAG"

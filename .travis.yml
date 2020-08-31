@@ -3,19 +3,22 @@ dist: trusty
 jobs:
   include:
     - stage: build docker image
-      if: branch IN (develop, master, refactor, aws-ecr) AND type IN (push, api)
+      if: branch IN (develop, master) AND type IN (push, api)
       script:
-      - case $TRAVIS_BRANCH in develop) DOCKER_TAG="staging" ;; master) DOCKER_TAG="production" ;; *) DOCKER_TAG=$TRAVIS_BRANCH ;; esac
+      - DOCKER_TAG=latest
+      - case $TRAVIS_BRANCH in develop) APP_ENV="stg" ;; master) APP_ENV="prd" ;; *) APP_ENV="stg" && DOCKER_TAG=$TRAVIS_BRANCH ;; esac
+      - echo "APP_ENV=$APP_ENV"
       - echo "DOCKER_TAG=$DOCKER_TAG"
       - pip install --user awscli
       - travis_wait 30 docker build -t travis-ci-build-appbuilder-agent .
       - docker images
       - eval $(aws ecr get-login --no-include-email --region $AWS_REGION) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env
-      - docker tag travis-ci-build-appbuilder-agent "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent:$DOCKER_TAG"
-      - docker push "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent:$DOCKER_TAG"
-      - # push to FCBH as well
+      - docker tag travis-ci-build-appbuilder-agent "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
+      - docker push "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
+      - # push master to FCBH
+      - if [[ "${TRAVIS_BRANCH}" != "master" ]]; then exit 0; fi
       - export AWS_ACCESS_KEY_ID=$FCBH_AWS_ACCESS_KEY_ID
       - export AWS_SECRET_ACCESS_KEY=$FCBH_AWS_SECRET_ACCESS_KEY
       - eval $(aws ecr get-login --no-include-email --region $FCBH_AWS_REGION)
-      - docker tag travis-ci-build-appbuilder-agent "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent:$DOCKER_TAG"
-      - docker push "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent:$DOCKER_TAG"
+      - docker tag travis-ci-build-appbuilder-agent "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
+      - docker push "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"

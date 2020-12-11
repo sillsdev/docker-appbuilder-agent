@@ -12,7 +12,7 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.SIL__AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.SIL__AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: ${{ secrets.SIL__AWS_DEFAULT_REGION }}
+      AWS_REGION: ${{ secrets.SIL__AWS_DEFAULT_REGION }}
       AWS_ECR_ACCOUNT: ${{ secrets.SIL__AWS_ECR_ACCOUNT }}
       FCBH_AWS_ACCESS_KEY_ID: ${{ secrets.FCBH__AWS_ACCESS_KEY_ID }}
       FCBH_AWS_SECRET_ACCESS_KEY: ${{ secrets.FCBH__AWS_SECRET_ACCESS_KEY }}
@@ -20,6 +20,9 @@ jobs:
       FCBH_AWS_ECR_ACCOUNT: ${{ secrets.FCBH__AWS_ECR_ACCOUNT }}
     steps:
       - uses: actions/checkout@v2
+      
+      - name: Show environment
+        run: env
 
       - name: Build docker image
         run: |

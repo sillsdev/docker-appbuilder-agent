@@ -26,5 +26,5 @@
     - ab-001-black-144.png
     - ab-001-black-72.png
 
-#- name: Prime gradle cache with build
-#  shell: scripture-app-builder -new -n web -p org.ebible -b /root/prime/eng-web_usfm.zip -ks /root/prime/keystore_prime.keystore -i /root/prime/keystore_prime.txt -a /root/prime/about.txt -ic /root/prime/ab-001-black-144.png -ic /root/prime/ab-001-black-72.png -build 
+- name: Prime gradle cache with build
+  shell: scripture-app-builder -new -n web -p org.ebible -b /root/prime/eng-web_usfm.zip -ks /root/prime/keystore_prime.keystore -i /root/prime/keystore_prime.txt -a /root/prime/about.txt -ic /root/prime/ab-001-black-144.png -ic /root/prime/ab-001-black-72.png -build 

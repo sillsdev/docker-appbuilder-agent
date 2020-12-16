@@ -18,6 +18,8 @@ jobs:
       FCBH_AWS_SECRET_ACCESS_KEY: ${{ secrets.FCBH__AWS_SECRET_ACCESS_KEY }}
       FCBH_AWS_REGION: ${{ secrets.FCBH__AWS_DEFAULT_REGION }}
       FCBH_AWS_ECR_ACCOUNT: ${{ secrets.FCBH__AWS_ECR_ACCOUNT }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     steps:
       - uses: actions/checkout@v2
       
@@ -33,14 +35,20 @@ jobs:
           pip install --user awscli
           docker build -t travis-ci-build-appbuilder-agent .
           docker images
+          # Push to Amazon ECR
           eval $(aws ecr get-login --no-include-email --region $AWS_REGION) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env
           docker tag travis-ci-build-appbuilder-agent "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
           docker push "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
-          # push master to FCBH
-          if [[ "${TRAVIS_BRANCH}" != "master" ]]; then exit 0; fi
+          # push master to FCBH Amazon ECR
+          if [[ "${TRAVIS_BRANCH}" == "master" ]]; then 
           export AWS_ACCESS_KEY_ID=$FCBH_AWS_ACCESS_KEY_ID
           export AWS_SECRET_ACCESS_KEY=$FCBH_AWS_SECRET_ACCESS_KEY
           eval $(aws ecr get-login --no-include-email --region $FCBH_AWS_REGION)
           docker tag travis-ci-build-appbuilder-agent "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
           docker push "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}" echo 
+          fi
+          # Push to Docker Hub
+          echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+          docker tag travis-ci-build-appbuilder-agent "sillsdev/appbuilder-agent:$DOCKER_TAG"
+          docker push "sillsdev/appbuilder-agent:$DOCKER_TAG"
 

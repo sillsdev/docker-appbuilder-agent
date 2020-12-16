@@ -1,5 +1,6 @@
-FROM phusion/baseimage:0.11
-MAINTAINER <Chris Hubbard> "chris_hubbard@sil.org"
+FROM phusion/baseimage:18.04-1.0.0
+LABEL maintainer="chris_hubbard@sil.org"
+LABEL refreshed_at="2020-12-11"
 
 RUN apt-get update && apt-get install -y\
   ansible\

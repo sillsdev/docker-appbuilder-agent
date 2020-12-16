@@ -1,4 +1,4 @@
 ---
 
 - name: Install Fastlane
-  gem: name=fastlane state=latest user_install=no
+  shell: HOME=/root eval "$($HOME/.rbenv/bin/rbenv init - )" && gem install fastlane

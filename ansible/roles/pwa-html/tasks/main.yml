@@ -12,8 +12,11 @@
     creates: /etc/apt/sources.list.d/nodesource.list
     executable: bash
     
-- name: Install NodeJs
-  apt: pkg=nodejs state=latest update_cache=yes
+- name: Install Packages
+  apt: pkg={{ item }} state=latest update_cache=yes
+  with_items:
+    - nodejs
+    - zip
   
 - name: Install Workbox-CLI
   npm:

@@ -49,6 +49,6 @@ jobs:
           fi
           # Push to Docker Hub
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-          docker tag travis-ci-build-appbuilder-agent "sillsdev/appbuilder-agent:$DOCKER_TAG"
-          docker push "sillsdev/appbuilder-agent:$DOCKER_TAG"
+          docker tag travis-ci-build-appbuilder-agent "sillsdev/appbuilder-agent-${APP_ENV}:$DOCKER_TAG"
+          docker push "sillsdev/appbuilder-agent-${APP_ENV}:$DOCKER_TAG"
 

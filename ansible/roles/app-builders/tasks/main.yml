@@ -6,10 +6,12 @@
   shell: echo android-sdk-installer android-sdk-installer/accepted-android-sdk-eula boolean true | debconf-set-selections -v
 
 - name: Install packages
-  apt: pkg={{ item }} state=latest update_cache=yes
-  with_items:
-    - android-sdk-installer
-    - app-builders
+  apt: 
+    pkg:
+      - android-sdk-installer
+      - app-builders
+    state: latest 
+    update_cache: yes
 
 - name: Make directory for files
   file:

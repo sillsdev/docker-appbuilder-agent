@@ -1,15 +1,16 @@
 ---
 
 - name: Install Build Packages
-  apt: pkg={{ item }} update_cache=yes state=latest
-  with_items:
-    - git
-    - cmake
-    - libpng-dev
-    - libpng16-16
-    - libxml2-dev
-    - pkg-config
-    - ninja-build
+  apt:
+    pkg:
+      - git
+      - cmake
+      - libpng-dev
+      - libpng16-16
+      - libxml2-dev
+      - pkg-config
+      - ninja-build
+    state: latest
 
 - name: Clone xcbuild source
   git: repo=https://github.com/facebook/xcbuild depth=1 dest=/src/xcbuild

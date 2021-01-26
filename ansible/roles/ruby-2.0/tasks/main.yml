@@ -9,21 +9,22 @@
     marker: '# {mark} ANSIBLE MANAGED BLOCK - rbenv'
 
 - name: Install rbenv dependencies
-  apt: pkg={{ item }} update_cache=yes state=latest
-  with_items:
-    - git
-    - curl
-    - libssl-dev
-    - libreadline-dev
-    - zlib1g-dev
-    - autoconf
-    - bison
-    - build-essential
-    - libyaml-dev
-    - libreadline-dev
-    - libncurses5-dev
-    - libffi-dev
-    - libgdbm-dev
+  apt: 
+    pkg:
+      - git
+      - curl
+      - libssl-dev
+      - libreadline-dev
+      - zlib1g-dev
+      - autoconf
+      - bison
+      - build-essential
+      - libyaml-dev
+      - libreadline-dev
+      - libncurses5-dev
+      - libffi-dev
+      - libgdbm-dev
+    state: latest
 
 - name: Install rbenv
   git:

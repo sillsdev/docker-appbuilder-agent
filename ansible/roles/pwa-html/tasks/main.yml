@@ -13,10 +13,11 @@
     executable: bash
     
 - name: Install Packages
-  apt: pkg={{ item }} state=latest update_cache=yes
-  with_items:
-    - nodejs
-    - zip
+  apt: 
+    pkg:
+      - nodejs
+      - zip
+    state: latest
   
 - name: Install Workbox-CLI
   npm:

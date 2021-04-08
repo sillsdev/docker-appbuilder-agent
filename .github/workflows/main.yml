@@ -48,12 +48,12 @@ jobs:
           docker tag travis-ci-build-appbuilder-agent "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
           docker push "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
           # push master to FCBH Amazon ECR
-          if [[ "${TRAVIS_BRANCH}" == "master" ]]; then 
+          if [[ "${BRANCH}" == "master" ]]; then 
           export AWS_ACCESS_KEY_ID=$FCBH_AWS_ACCESS_KEY_ID
           export AWS_SECRET_ACCESS_KEY=$FCBH_AWS_SECRET_ACCESS_KEY
           eval $(aws ecr get-login --no-include-email --region $FCBH_AWS_REGION)
           docker tag travis-ci-build-appbuilder-agent "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
-          docker push "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}" echo 
+          docker push "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
           fi
           # Push to Docker Hub
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin

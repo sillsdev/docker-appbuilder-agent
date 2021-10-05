@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y\
   python3-apt\
   python3-pycurl\
   python3-pip\
+  ca-certificates\
   busybox &&\
   python3 -m pip install pip --upgrade pip &&\
   pip install ansible &&\

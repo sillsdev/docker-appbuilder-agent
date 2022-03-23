@@ -93,11 +93,10 @@ jobs:
           registries: ${{ secrets.FCBH__AWS_ECR_ACCOUNT }}
 
       - name: Push to ECR (FCBH)
-        if: ${{ steps.meta.outputs.Branch }} == "master"
         uses: docker/build-push-action@v2
         with:
           context: .
-          push: true
+          push: steps.meta.outputs.AppEnv == 'prd'
           tags: |
             "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
             "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"

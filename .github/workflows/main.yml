@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
     inputs:
       logLevel:
-        description: 'Log Level'
+        description: "Log Level"
         required: true
-        default: 'warning'
+        default: "warning"
       tags:
-        description: 'Tags'
+        description: "Tags"
   schedule:
-    - cron: '0 0 * * 0' # weekly
+    - cron: "0 0 * * 0" # weekly
 
 jobs:
   build:
@@ -28,11 +28,13 @@ jobs:
       FCBH_AWS_ECR_ACCOUNT: ${{ secrets.FCBH__AWS_ECR_ACCOUNT }}
     steps:
       - uses: actions/checkout@v2
-      
-      - uses: docker/login-action@v1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Show environment
         run: env
@@ -67,9 +69,8 @@ jobs:
           docker tag build-appbuilder-agent "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${VERSION_TAG}"
           docker push "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${VERSION_TAG}"
           fi
-          # Push to Docker Hub
-          docker tag build-appbuilder-agent "sillsdev/appbuilder-agent-${APP_ENV}:$DOCKER_TAG"
-          docker push "sillsdev/appbuilder-agent-${APP_ENV}:$DOCKER_TAG"
-          docker tag build-appbuilder-agent "sillsdev/appbuilder-agent-${APP_ENV}:$VERSION_TAG"
-          docker push "sillsdev/appbuilder-agent-${APP_ENV}:$VERSION_TAG"
-
+          # Push to GitHub Container Registry
+          docker tag build-appbuilder-agent "ghcr.io/sillsdev/appbuilder-agent-${APP_ENV}:$DOCKER_TAG"
+          docker push "ghcr.io/sillsdev/appbuilder-agent-${APP_ENV}:$DOCKER_TAG"
+          docker tag build-appbuilder-agent "ghcr.io/sillsdev/appbuilder-agent-${APP_ENV}:$VERSION_TAG"
+          docker push "ghcr.io/sillsdev/appbuilder-agent-${APP_ENV}:$VERSION_TAG"

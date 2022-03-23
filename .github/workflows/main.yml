@@ -38,22 +38,32 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
 
-      - name: Login to Amazon ECR (SIL)
-        id: ecr_sil
-        uses: aws-actions/amazon-ecr-login@v1
+      - name: Configure AWS Credentials (SIL)
+        id: aws_sil
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.SIL__AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.SIL__AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.SIL__AWS_DEFAULT_REGION }}
+
+      - name: Login to Amazon ECR (SIL)
+        id: ecr_sil
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
           registries: ${{ secrets.SIL__AWS_ECR_ACCOUNT }}
+
+      - name: Configure AWS Credentials (FCBH)
+        id: aws_fcbh
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.FCBH__AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.FCBH__AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.FCBH__AWS_DEFAULT_REGION }}
 
       - name: Login to Amazon ECR (FCBH)
         id: ecr_fcbh
         uses: aws-actions/amazon-ecr-login@v1
         with:
-          aws-access-key-id: ${{ secrets.FCBH__AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.FCBH__AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.FCBH__AWS_DEFAULT_REGION }}
           registries: ${{ secrets.FCBH__AWS_ECR_ACCOUNT }}
 
       - name: Build docker image

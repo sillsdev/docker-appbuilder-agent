@@ -29,6 +29,7 @@ jobs:
       - name: Determine docker tags
         id: meta
         run: |
+          DOCKER_TAG=latest
           if [[ "${GITHUB_HEAD_REF}" != "" ]]; then BRANCH="${GITHUB_HEAD_REF}"; else BRANCH="${GITHUB_REF_NAME}"; fi
           case $BRANCH in develop) APP_ENV="stg" ;; master) APP_ENV="prd" ;; *) APP_ENV="stg" && DOCKER_TAG="${BRANCH/\//-}" ;; esac
           echo "Branch=${BRANCH}"
@@ -79,6 +80,7 @@ jobs:
             "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
 
       - name: Configure AWS Credentials (FCBH)
+        if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
         id: aws_fcbh
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -87,33 +89,35 @@ jobs:
           aws-region: ${{ secrets.FCBH__AWS_DEFAULT_REGION }}
 
       - name: Login to Amazon ECR (FCBH)
+        if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
         id: ecr_fcbh
         uses: aws-actions/amazon-ecr-login@v1
         with:
           registries: ${{ secrets.FCBH__AWS_ECR_ACCOUNT }}
 
       - name: Push to ECR (FCBH)
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: ${{ steps.meta.outputs.AppEnv == 'prd' }}
-          tags: |
-            "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
-            "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
-
-      - name: Push to DockerHub
+        if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
           tags: |
-            "sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+            "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+            "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+
+      # - name: Login to DockerHub
+      #   uses: docker/login-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+      # - name: Push to DockerHub
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: .
+      #     push: true
+      #     tags: |
+      #       "sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
 
       - name: Login to GHCR
         uses: docker/login-action@v1

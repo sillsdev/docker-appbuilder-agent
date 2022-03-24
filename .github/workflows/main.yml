@@ -96,7 +96,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          push: steps.meta.outputs.AppEnv == 'prd'
+          push: ${{ steps.meta.outputs.AppEnv == 'prd' }}
           tags: |
             "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
             "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"

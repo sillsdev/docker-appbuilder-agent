@@ -14,63 +14,122 @@ on:
   schedule:
     - cron: "0 0 * * 0" # weekly
 
+env:
+  BUILD_TAG: build-appbuilder-agent:latest
+
 jobs:
   build:
-    runs-on: ubuntu-18.04
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.SIL__AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.SIL__AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.SIL__AWS_DEFAULT_REGION }}
-      AWS_ECR_ACCOUNT: ${{ secrets.SIL__AWS_ECR_ACCOUNT }}
-      FCBH_AWS_ACCESS_KEY_ID: ${{ secrets.FCBH__AWS_ACCESS_KEY_ID }}
-      FCBH_AWS_SECRET_ACCESS_KEY: ${{ secrets.FCBH__AWS_SECRET_ACCESS_KEY }}
-      FCBH_AWS_REGION: ${{ secrets.FCBH__AWS_DEFAULT_REGION }}
-      FCBH_AWS_ECR_ACCOUNT: ${{ secrets.FCBH__AWS_ECR_ACCOUNT }}
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
 
-      - name: Login to GitHub Container Registry
+      - name: Show environment
+        run: env
+
+      - name: Determine docker tags
+        id: meta
+        run: |
+          DOCKER_TAG=latest
+          if [[ "${GITHUB_HEAD_REF}" != "" ]]; then BRANCH="${GITHUB_HEAD_REF}"; else BRANCH="${GITHUB_REF_NAME}"; fi
+          case $BRANCH in develop) APP_ENV="stg" ;; master) APP_ENV="prd" ;; *) APP_ENV="stg" && DOCKER_TAG="${BRANCH/\//-}" ;; esac
+          echo "Branch=${BRANCH}"
+          echo "DockerTag=${DOCKER_TAG}"
+          echo "AppEnv=${APP_ENV}"
+          echo "::set-output name=Branch::${BRANCH}"
+          echo "::set-output name=DockerTag::${DOCKER_TAG}"
+          echo "::set-output name=AppEnv::${APP_ENV}"
+
+      - name: Build docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          load: true
+          tags: ${{ env.BUILD_TAG }}
+
+      - name: Get version
+        id: version
+        run: |
+          docker images
+          mkdir $HOME/out
+          id=$(docker create ${{ env.BUILD_TAG }})
+          docker cp $id:/usr/share/app-builders/VERSION $HOME/out
+          docker rm -v $id
+          echo "::set-output name=VersionTag::$(cat $HOME/out/VERSION)"
+
+      - name: Configure AWS credentials (SIL)
+        id: aws_sil
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.SIL__AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.SIL__AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.SIL__AWS_DEFAULT_REGION }}
+
+      - name: Login to AWS ECR (SIL)
+        id: ecr_sil
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registries: ${{ secrets.SIL__AWS_ECR_ACCOUNT }}
+
+      - name: Push to AWS ECR (SIL)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: |
+            "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+            "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+
+      - name: Configure AWS credentials (FCBH)
+        if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
+        id: aws_fcbh
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.FCBH__AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.FCBH__AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.FCBH__AWS_DEFAULT_REGION }}
+
+      - name: Login to AWS ECR (FCBH)
+        if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
+        id: ecr_fcbh
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registries: ${{ secrets.FCBH__AWS_ECR_ACCOUNT }}
+
+      - name: Push to AWS ECR (FCBH)
+        if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: |
+            "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+            "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+
+      # - name: Login to DockerHub
+      #   uses: docker/login-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+      # - name: Push to DockerHub
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: .
+      #     push: true
+      #     tags: |
+      #       "sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+
+      - name: Login to GHCR
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Show environment
-        run: env
-
-      - name: Build docker image
-        run: |
-          DOCKER_TAG=latest
-          BRANCH=${GITHUB_REF/refs\/heads\//}
-          case $BRANCH in develop) APP_ENV="stg" ;; master) APP_ENV="prd" ;; *) APP_ENV="stg" && DOCKER_TAG=$BRANCH ;; esac
-          echo "DOCKER_TAG=$DOCKER_TAG"
-          pip install --user awscli
-          docker build -t build-appbuilder-agent .
-          docker images
-          mkdir $HOME/out
-          id=$(docker create build-appbuilder-agent)
-          docker cp $id:/usr/share/app-builders/VERSION $HOME/out
-          docker rm -v $id
-          export VERSION_TAG=$(cat $HOME/out/VERSION)
-          # Push to Amazon ECR
-          eval $(aws ecr get-login --no-include-email --region $AWS_REGION) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env
-          docker tag build-appbuilder-agent "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
-          docker push "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
-          docker tag build-appbuilder-agent "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${VERSION_TAG}"
-          docker push "${AWS_ECR_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${VERSION_TAG}"
-          # push master to FCBH Amazon ECR
-          if [[ "${BRANCH}" == "master" ]]; then 
-          export AWS_ACCESS_KEY_ID=$FCBH_AWS_ACCESS_KEY_ID
-          export AWS_SECRET_ACCESS_KEY=$FCBH_AWS_SECRET_ACCESS_KEY
-          eval $(aws ecr get-login --no-include-email --region $FCBH_AWS_REGION)
-          docker tag build-appbuilder-agent "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
-          docker push "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${DOCKER_TAG}"
-          docker tag build-appbuilder-agent "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${VERSION_TAG}"
-          docker push "${FCBH_AWS_ECR_ACCOUNT}.dkr.ecr.${FCBH_AWS_REGION}.amazonaws.com/appbuilder-agent-${APP_ENV}:${VERSION_TAG}"
-          fi
-          # Push to GitHub Container Registry
-          docker tag build-appbuilder-agent "ghcr.io/sillsdev/appbuilder-agent-${APP_ENV}:$DOCKER_TAG"
-          docker push "ghcr.io/sillsdev/appbuilder-agent-${APP_ENV}:$DOCKER_TAG"
-          docker tag build-appbuilder-agent "ghcr.io/sillsdev/appbuilder-agent-${APP_ENV}:$VERSION_TAG"
-          docker push "ghcr.io/sillsdev/appbuilder-agent-${APP_ENV}:$VERSION_TAG"
+      - name: Push to GHCR
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: |
+            "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"

@@ -56,7 +56,7 @@ jobs:
           docker rm -v $id
           echo "::set-output name=VersionTag::$(cat $HOME/out/VERSION)"
 
-      - name: Configure AWS Credentials (SIL)
+      - name: Configure AWS credentials (SIL)
         id: aws_sil
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -64,13 +64,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.SIL__AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.SIL__AWS_DEFAULT_REGION }}
 
-      - name: Login to Amazon ECR (SIL)
+      - name: Login to AWS ECR (SIL)
         id: ecr_sil
         uses: aws-actions/amazon-ecr-login@v1
         with:
           registries: ${{ secrets.SIL__AWS_ECR_ACCOUNT }}
 
-      - name: Push to ECR (SIL)
+      - name: Push to AWS ECR (SIL)
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -79,7 +79,7 @@ jobs:
             "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
             "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
 
-      - name: Configure AWS Credentials (FCBH)
+      - name: Configure AWS credentials (FCBH)
         if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
         id: aws_fcbh
         uses: aws-actions/configure-aws-credentials@v1
@@ -88,14 +88,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.FCBH__AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.FCBH__AWS_DEFAULT_REGION }}
 
-      - name: Login to Amazon ECR (FCBH)
+      - name: Login to AWS ECR (FCBH)
         if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
         id: ecr_fcbh
         uses: aws-actions/amazon-ecr-login@v1
         with:
           registries: ${{ secrets.FCBH__AWS_ECR_ACCOUNT }}
 
-      - name: Push to ECR (FCBH)
+      - name: Push to AWS ECR (FCBH)
         if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
         uses: docker/build-push-action@v2
         with:

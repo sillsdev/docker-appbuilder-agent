@@ -1,4 +1,4 @@
-FROM phusion/baseimage:18.04-1.0.0
+FROM --platform=linux/amd64 phusion/baseimage:18.04-1.0.0
 LABEL maintainer="chris_hubbard@sil.org"
 LABEL refreshed_at="2020-12-11"
 

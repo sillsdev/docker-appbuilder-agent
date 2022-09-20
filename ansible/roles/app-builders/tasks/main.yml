@@ -11,14 +11,30 @@
     - ppa:savoury1/ffmpeg4
     - ppa:savoury1/ffmpeg5
 
+- name: Add Bellsoft Java repository
+  apt_key: url="https://download.bell-sw.com/pki/GPG-KEY-bellsoft"
+
+- name: Add repositories
+  apt_repository: repo="{{ item }}"
+                  state=present
+                  update_cache=yes
+  with_items:
+    - "deb [arch=amd64] https://apt.bell-sw.com/ stable main"
+
 - name: Install packages
   apt: 
     pkg:
       - android-sdk-installer
       - app-builders
       - ffmpeg
+      - bellsoft-java11-full
     state: latest 
     update_cache: yes
+
+- name: Update to use Bellsoft Java 11
+  alternatives:
+    name: java
+    path: /usr/lib/jvm/bellsoft-java11-full-amd64
 
 - name: Make directory for files
   file:

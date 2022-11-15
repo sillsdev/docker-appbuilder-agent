@@ -3,6 +3,7 @@
   gather_facts: False
   roles:
     - pwa-html
+    - asset-package
     - codebuild
 #    - xcbuild
     - ruby-2.0

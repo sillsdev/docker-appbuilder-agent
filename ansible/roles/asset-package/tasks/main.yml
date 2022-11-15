@@ -1,0 +1,11 @@
+- name: Install Packages
+  apt: 
+    pkg:
+      - imagemagick
+    state: latest
+
+
+- name: Download langtags.json
+  get_url:
+    url: https://ldml.api.sil.org/langtags.json
+    dest: /root/langtags.json

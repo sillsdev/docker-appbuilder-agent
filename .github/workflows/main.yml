@@ -35,9 +35,9 @@ jobs:
           echo "Branch=${BRANCH}"
           echo "DockerTag=${DOCKER_TAG}"
           echo "AppEnv=${APP_ENV}"
-          echo "::set-output name=Branch::${BRANCH}"
-          echo "::set-output name=DockerTag::${DOCKER_TAG}"
-          echo "::set-output name=AppEnv::${APP_ENV}"
+          echo "Branch=${BRANCH}" >> $GITHUB_OUTPUT
+          echo "DockerTag=${DOCKER_TAG}" >> $GITHUB_OUTPUT
+          echo "AppEnv=${APP_ENV}" >> $GITHUB_OUTPUT
 
       - name: Build docker image
         uses: docker/build-push-action@v2
@@ -54,7 +54,7 @@ jobs:
           id=$(docker create ${{ env.BUILD_TAG }})
           docker cp $id:/usr/share/app-builders/VERSION $HOME/out
           docker rm -v $id
-          echo "::set-output name=VersionTag::$(cat $HOME/out/VERSION)"
+          echo "VersionTag=$(cat $HOME/out/VERSION)" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials (SIL)
         id: aws_sil
@@ -133,3 +133,4 @@ jobs:
           push: true
           tags: |
             "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+            "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"

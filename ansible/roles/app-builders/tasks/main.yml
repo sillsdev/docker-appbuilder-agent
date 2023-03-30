@@ -5,18 +5,11 @@
 - name: Preseed dpkg for android-sdk-installer
   shell: echo android-sdk-installer android-sdk-installer/accepted-android-sdk-eula boolean true | debconf-set-selections -v
 
-- name: Add ffmpeg repository from PPA 
-  apt_repository: repo="{{ item }}" state=present update_cache=yes
-  with_items:
-    - ppa:savoury1/ffmpeg4
-    - ppa:savoury1/ffmpeg5
-
 - name: Install packages
   apt: 
     pkg:
       - android-sdk-installer
       - app-builders
-      - ffmpeg
     state: latest 
     update_cache: yes
 

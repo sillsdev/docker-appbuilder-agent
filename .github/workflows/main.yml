@@ -134,3 +134,20 @@ jobs:
           tags: |
             "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
             "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+      - name: Cleanup older untagged packages, keep 2
+        uses: actions/delete-package-versions@v4
+        with:
+          context: .
+          package-name: "appbuilder-agent-${{ steps.meta.outputs.AppEnv }}"
+          package-type: 'container'
+          min-versions-to-keep: 2
+          delete-only-untagged-versions: 'true'
+
+      - name: Cleanup older all packages, keep 6
+        uses: actions/delete-package-versions@v4
+        with:
+          context: .
+          package-name: "appbuilder-agent-${{ steps.meta.outputs.AppEnv }}"
+          package-type: 'container'
+          min-versions-to-keep: 6
+

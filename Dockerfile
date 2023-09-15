@@ -19,3 +19,8 @@ WORKDIR /ansible
 RUN mkdir -p /etc/ansible && echo local > /etc/ansible/hosts &&\
   ansible-playbook playbook.yml -c local &&\
   apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/*.* /App \Builder/Scripture\ Apps/App\ Projects/* /tmp/App\ Builder/*
+
+COPY patch /patch
+WORKDIR /patch
+
+RUN patch /root/.rbenv/versions/2.7.1/lib/ruby/gems/2.7.0/gems/fastlane-2.214.0/supply/lib/supply/client.rb < 21507.patch

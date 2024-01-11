@@ -1,6 +1,6 @@
-FROM --platform=linux/amd64 phusion/baseimage:18.04-1.0.0
+FROM --platform=linux/amd64 phusion/baseimage:jammy-1.0.1
 LABEL maintainer="chris_hubbard@sil.org"
-LABEL refreshed_at="2020-12-11"
+LABEL refreshed_at="2024-01-11"
 
 RUN apt-get update && apt-get install -y\
   python3-apt\

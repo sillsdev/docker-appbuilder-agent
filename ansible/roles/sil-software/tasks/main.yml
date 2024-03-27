@@ -11,5 +11,5 @@
                   state=present
                   update_cache=yes
   with_items:
-    - "deb http://packages.sil.org/ubuntu bionic main"
-    # - "deb http://linux.lsdev.sil.org/ubuntu bionic main"
+    - "deb http://packages.sil.org/ubuntu jammy main"
+    # - "deb http://linux.lsdev.sil.org/ubuntu jammy main"

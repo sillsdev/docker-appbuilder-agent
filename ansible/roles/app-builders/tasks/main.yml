@@ -24,9 +24,13 @@
     - keystore_prime.keystore
     - keystore_prime.txt
     - eng-web_usfm.zip
+    - eng-bsb_usx.zip
     - about.txt
     - ab-001-black-144.png
     - ab-001-black-72.png
 
 - name: Prime gradle cache with build
-  shell: HOME=/root scripture-app-builder -new -n web -p org.ebible -b /root/prime/eng-web_usfm.zip -ks /root/prime/keystore_prime.keystore -i /root/prime/keystore_prime.txt -a /root/prime/about.txt -ic /root/prime/ab-001-black-144.png -ic /root/prime/ab-001-black-72.png -fp build=/tmp/build
+  shell: HOME=/root scripture-app-builder -new -n web -p org.ebible -b /root/prime/eng-web_usfm.zip -ks /root/prime/keystore_prime.keystore -i /root/prime/keystore_prime.txt -a /root/prime/about.txt -ic /root/prime/ab-001-black-144.png -ic /root/prime/ab-001-black-72.png -fp build=/tmp/build 
+
+- name: Prime npm cache with build
+  shell: HOME=/root scripture-app-builder -new -n bsb -p org.bsb -b /root/prime/eng-bsb_usx.zip -ks /root/prime/keystore_prime.keystore -i /root/prime/keystore_prime.txt -a /root/prime/about.txt -ic /root/prime/ab-001-black-144.png -ic /root/prime/ab-001-black-72.png -fp build=/tmp/build -build-modern-pwa

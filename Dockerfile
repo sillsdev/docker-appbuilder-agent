@@ -18,7 +18,7 @@ WORKDIR /ansible
 # Clean up when done. (Preserve 'App Projects' directory!)
 RUN mkdir -p /etc/ansible && echo local > /etc/ansible/hosts &&\
   ansible-playbook playbook.yml -c local &&\
-  apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/*.* /App \Builder/Scripture\ Apps/App\ Projects/* /tmp/App\ Builder/*
+  apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/*.* /App \Builder/Scripture\ Apps/App\ Projects/* /tmp/App\ Builder/* /root/App\ Builder/Scripture\ Apps/PWA\ Output
 
 #COPY patch /patch
 #WORKDIR /patch

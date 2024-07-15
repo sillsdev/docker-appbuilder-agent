@@ -36,9 +36,9 @@
     repo: https://github.com/rbenv/ruby-build.git
     dest: /root/.rbenv/plugins/ruby-build
 
-- name: Install ruby 2.7.1
+- name: Install ruby 3.3.4
   shell: |
-    /root/.rbenv/bin/rbenv install 2.7.1
-    /root/.rbenv/bin/rbenv global 2.7.1
+    /root/.rbenv/bin/rbenv install 3.3.4
+    /root/.rbenv/bin/rbenv global 3.3.4
   args:
     executable: /bin/bash

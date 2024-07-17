@@ -6,11 +6,12 @@
   shell: echo android-sdk-installer android-sdk-installer/accepted-android-sdk-eula boolean true | debconf-set-selections -v
 
 - name: Install packages
-  apt: 
+  apt:
     pkg:
       - android-sdk-installer
-      - app-builders
-    state: latest 
+      - openjfx
+    #  - app-builders // changed to copying from ghcr.io/sillsdev/app-builders docker container
+    state: latest
     update_cache: yes
 
 - name: Make directory for files
@@ -28,9 +29,8 @@
     - about.txt
     - ab-001-black-144.png
     - ab-001-black-72.png
+# - name: Prime gradle cache with build
+#   shell: HOME=/root scripture-app-builder -new -n web -p org.ebible -b /root/prime/eng-web_usfm.zip -ks /root/prime/keystore_prime.keystore -i /root/prime/keystore_prime.txt -a /root/prime/about.txt -ic /root/prime/ab-001-black-144.png -ic /root/prime/ab-001-black-72.png -fp build=/tmp/build
 
-- name: Prime gradle cache with build
-  shell: HOME=/root scripture-app-builder -new -n web -p org.ebible -b /root/prime/eng-web_usfm.zip -ks /root/prime/keystore_prime.keystore -i /root/prime/keystore_prime.txt -a /root/prime/about.txt -ic /root/prime/ab-001-black-144.png -ic /root/prime/ab-001-black-72.png -fp build=/tmp/build 
-
-- name: Prime npm cache with build
-  shell: HOME=/root scripture-app-builder -new -n bsb -p org.bsb -b /root/prime/eng-bsb_usx.zip -ks /root/prime/keystore_prime.keystore -i /root/prime/keystore_prime.txt -a /root/prime/about.txt -ic /root/prime/ab-001-black-144.png -ic /root/prime/ab-001-black-72.png -fp build=/tmp/build -build-modern-pwa
+# - name: Prime npm cache with build
+#   shell: HOME=/root scripture-app-builder -new -n bsb -p org.bsb -b /root/prime/eng-bsb_usx.zip -ks /root/prime/keystore_prime.keystore -i /root/prime/keystore_prime.txt -a /root/prime/about.txt -ic /root/prime/ab-001-black-144.png -ic /root/prime/ab-001-black-72.png -fp build=/tmp/build -build-modern-pwa

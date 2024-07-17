@@ -52,7 +52,7 @@ jobs:
           docker images
           mkdir $HOME/out
           id=$(docker create ${{ env.BUILD_TAG }})
-          docker cp $id:/usr/share/app-builders/VERSION $HOME/out
+          docker cp $id:/app-builders/VERSION $HOME/out
           docker rm -v $id
           echo "VersionTag=$(cat $HOME/out/VERSION)" >> $GITHUB_OUTPUT
 
@@ -124,14 +124,13 @@ jobs:
         uses: actions/delete-package-versions@v4
         with:
           package-name: "appbuilder-agent-${{ steps.meta.outputs.AppEnv }}"
-          package-type: 'container'
+          package-type: "container"
           min-versions-to-keep: 2
-          delete-only-untagged-versions: 'true'
+          delete-only-untagged-versions: "true"
 
       - name: Cleanup older all packages, keep 6
         uses: actions/delete-package-versions@v4
         with:
           package-name: "appbuilder-agent-${{ steps.meta.outputs.AppEnv }}"
-          package-type: 'container'
+          package-type: "container"
           min-versions-to-keep: 6
-

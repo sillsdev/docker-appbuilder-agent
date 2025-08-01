@@ -1,7 +1,0 @@
----
-
-- name: Install awscli
-  script: /usr/local/bin/pip install awscli --upgrade
-
-- name: Copy pepk tool
-  copy: src=pepk.jar dest=/root/pepk.jar

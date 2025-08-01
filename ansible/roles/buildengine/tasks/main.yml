@@ -1,9 +1,11 @@
 ---
-
 - name: Install packages
-  apt: 
+  apt:
     pkg:
       - libxml2-utils
       - xmlstarlet
       - jq
     state: latest
+
+- name: Install awscli
+  script: /usr/local/bin/pip install awscli --upgrade

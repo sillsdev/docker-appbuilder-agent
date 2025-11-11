@@ -39,12 +39,46 @@ jobs:
           echo "DockerTag=${DOCKER_TAG}" >> $GITHUB_OUTPUT
           echo "AppEnv=${APP_ENV}" >> $GITHUB_OUTPUT
 
+      - name: Extract versions from builder image
+        id: versions
+        run: |
+          # Pull the builder image and extract versions.json
+          docker pull ghcr.io/sillsdev/app-builders:latest
+          CONTAINER_ID=$(docker create ghcr.io/sillsdev/app-builders:latest /bin/true)
+          docker cp ${CONTAINER_ID}:/versions.json ./versions.json
+          docker rm ${CONTAINER_ID}
+
+          # Parse versions.json using jq and set outputs
+          echo "Contents of versions.json:"
+          cat ./versions.json
+
+          VERSION_SAB=$(jq -r '.scriptureappbuilder' ./versions.json)
+          VERSION_RAB=$(jq -r '.readingappbuilder' ./versions.json)
+          VERSION_DAB=$(jq -r '.dictionaryappbuilder' ./versions.json)
+          VERSION_KAB=$(jq -r '.keyboardappbuilder' ./versions.json)
+
+          echo "Extracted versions:"
+          echo "  scriptureappbuilder: $VERSION_SAB"
+          echo "  readingappbuilder: $VERSION_RAB"
+          echo "  dictionaryappbuilder: $VERSION_DAB"
+          echo "  keyboardappbuilder: $VERSION_KAB"
+
+          echo "VERSION_SAB=$VERSION_SAB" >> $GITHUB_OUTPUT
+          echo "VERSION_RAB=$VERSION_RAB" >> $GITHUB_OUTPUT
+          echo "VERSION_DAB=$VERSION_DAB" >> $GITHUB_OUTPUT
+          echo "VERSION_KAB=$VERSION_KAB" >> $GITHUB_OUTPUT
+
       - name: Build docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           load: true
           tags: ${{ env.BUILD_TAG }}
+          build-args: |
+            VERSION_SAB=${{ steps.versions.outputs.VERSION_SAB }}
+            VERSION_RAB=${{ steps.versions.outputs.VERSION_RAB }}
+            VERSION_DAB=${{ steps.versions.outputs.VERSION_DAB }}
+            VERSION_KAB=${{ steps.versions.outputs.VERSION_KAB }}
 
       - name: Get version
         id: version
@@ -71,13 +105,11 @@ jobs:
           registries: ${{ secrets.SIL__AWS_ECR_ACCOUNT }}
 
       - name: Push to AWS ECR (SIL)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
-            "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+        run: |
+          docker tag ${{ env.BUILD_TAG }} "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+          docker tag ${{ env.BUILD_TAG }} "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+          docker push "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+          docker push "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
 
       - name: Configure AWS credentials (FCBH)
         if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
@@ -97,13 +129,11 @@ jobs:
 
       - name: Push to AWS ECR (FCBH)
         if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
-            "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+        run: |
+          docker tag ${{ env.BUILD_TAG }} "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+          docker tag ${{ env.BUILD_TAG }} "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+          docker push "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+          docker push "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -113,13 +143,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push to GHCR
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
-            "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+        run: |
+          docker tag ${{ env.BUILD_TAG }} "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+          docker tag ${{ env.BUILD_TAG }} "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+          docker push "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
+          docker push "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
       - name: Cleanup older untagged packages, keep 2
         uses: actions/delete-package-versions@v5
         with:

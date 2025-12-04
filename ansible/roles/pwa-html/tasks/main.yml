@@ -37,6 +37,7 @@
     . /root/.nvm/nvm.sh
     ln -sf $(which node) /usr/local/bin/node
     ln -sf $(which npm) /usr/local/bin/npm
+    ln -sf $(which npx) /usr/local/bin/npx
   args:
     executable: bash
   environment:

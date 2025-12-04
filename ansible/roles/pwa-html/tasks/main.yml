@@ -1,22 +1,46 @@
 ---
-- name: Download nodesource APT repo script
-  get_url:
-    url: https://deb.nodesource.com/setup_22.x
-    dest: /tmp/setup-node-apt-source.sh
-    mode: 777
-
-- name: Setup nodesoure APT repo
-  shell: /tmp/setup-node-apt-source.sh
-  args:
-    creates: /etc/apt/sources.list.d/nodesource.list
-    executable: bash
-
-- name: Install Packages
+- name: Install dependencies for nvm
   apt:
     pkg:
-      - nodejs
+      - curl
       - zip
-    state: latest
+    state: present
+    update_cache: yes
+
+- name: Download nvm install script
+  get_url:
+    url: https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh
+    dest: /tmp/install-nvm.sh
+    mode: "0755"
+
+- name: Install nvm
+  shell: /tmp/install-nvm.sh
+  args:
+    creates: /root/.nvm/nvm.sh
+    executable: bash
+  environment:
+    HOME: /root
+
+- name: Install Node.js v22.21.1 using nvm
+  shell: |
+    . /root/.nvm/nvm.sh
+    nvm install v22.21.1
+    nvm alias default v22.21.1
+  args:
+    creates: /root/.nvm/versions/node/v22.21.1
+    executable: bash
+  environment:
+    HOME: /root
+
+- name: Create symlinks for node and npm in /usr/local/bin
+  shell: |
+    . /root/.nvm/nvm.sh
+    ln -sf $(which node) /usr/local/bin/node
+    ln -sf $(which npm) /usr/local/bin/npm
+  args:
+    executable: bash
+  environment:
+    HOME: /root
 
 - name: Install Workbox-CLI
   npm:

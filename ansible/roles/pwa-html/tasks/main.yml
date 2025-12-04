@@ -1,24 +1,23 @@
 ---
-
 - name: Download nodesource APT repo script
   get_url:
-    url:  https://deb.nodesource.com/setup_20.x
+    url: https://deb.nodesource.com/setup_22.x
     dest: /tmp/setup-node-apt-source.sh
     mode: 777
 
-- name:  Setup nodesoure APT repo
+- name: Setup nodesoure APT repo
   shell: /tmp/setup-node-apt-source.sh
   args:
     creates: /etc/apt/sources.list.d/nodesource.list
     executable: bash
-    
+
 - name: Install Packages
-  apt: 
+  apt:
     pkg:
       - nodejs
       - zip
     state: latest
-  
+
 - name: Install Workbox-CLI
   npm:
     name: workbox-cli

@@ -52,31 +52,40 @@ jobs:
             }
 
             // For develop branch, check which of 'staging' or 'latest' is newer in GHCR
-            const token = context.token;
             const headers = {
-              'Accept': 'application/vnd.oci.image.manifest.v1+json',
-              'Authorization': `token ${token}`
+              'Accept': 'application/vnd.oci.image.manifest.v1+json'
             };
 
             try {
               // Check if staging tag exists in GHCR
+              console.log('Checking for staging tag in GHCR...');
               const stagingRes = await fetch('https://ghcr.io/v2/sillsdev/app-builders/manifests/staging', { headers });
-              const stagingExists = stagingRes.ok || stagingRes.status === 200 || stagingRes.status === 401;
+              console.log(`Staging tag response: ${stagingRes.status} ${stagingRes.statusText}`);
+              const stagingExists = stagingRes.status !== 404;
               
               // Check if latest tag exists in GHCR
+              console.log('Checking for latest tag in GHCR...');
               const latestRes = await fetch('https://ghcr.io/v2/sillsdev/app-builders/manifests/latest', { headers });
-              const latestExists = latestRes.ok || latestRes.status === 200 || latestRes.status === 401;
+              console.log(`Latest tag response: ${latestRes.status} ${latestRes.statusText}`);
+              const latestExists = latestRes.status !== 404;
+
+              console.log(`Staging exists: ${stagingExists}, Latest exists: ${latestExists}`);
 
               if (stagingExists && latestExists) {
                 // Both tags exist, try to compare dates from GitHub package metadata
-                const pkgRes = await fetch('https://api.github.com/users/sillsdev/packages?package_type=container&per_page=10', { headers: { 'Authorization': `token ${token}` } });
+                console.log('Both tags exist, attempting to compare dates...');
+                const token = context.token;
+                const pkgRes = await fetch('https://api.github.com/user/packages?package_type=container&per_page=10', { headers: { 'Authorization': `token ${token}` } });
+                console.log(`Package list response: ${pkgRes.status}`);
                 if (pkgRes.ok) {
                   const packages = await pkgRes.json();
                   const appBuilderspkg = packages.find(pkg => pkg.name === 'app-builders');
                   if (appBuilderspkg) {
                     const versionsRes = await fetch(`https://api.github.com/user/packages/container/app-builders/versions`, { headers: { 'Authorization': `token ${token}` } });
+                    console.log(`Versions response: ${versionsRes.status}`);
                     if (versionsRes.ok) {
                       const versions = await versionsRes.json();
+                      console.log(`Found ${versions.length} versions`);
                       const staging = versions.find(v => v.name === 'staging');
                       const latest = versions.find(v => v.name === 'latest');
                       if (staging && latest) {

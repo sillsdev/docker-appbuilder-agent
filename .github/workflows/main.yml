@@ -51,55 +51,123 @@ jobs:
               return;
             }
 
+            let token = null;
+            // Request anonymous pull token for ghcr.io
+            try {
+              console.log('Requesting anonymous pull token for ghcr.io...');
+              const tokenRes = await fetch('https://ghcr.io/token?scope=repository:sillsdev/app-builders:pull', {
+                headers: { 'Accept': 'application/json' }
+              });
+              console.log(`Token response: ${tokenRes.status} ${tokenRes.statusText}`);
+              if (!tokenRes.ok) {
+                throw new Error(`Failed to get token: ${tokenRes.status} ${tokenRes.statusText}`);
+              }
+              const tokenData = await tokenRes.json();
+              if (!tokenData.token) {
+                core.setOutput('tag', 'latest');
+                console.log('No token received in response, defaulting to latest tag');
+                return;
+              }
+
+              token = tokenData.token;
+              console.log('Successfully obtained pull token.');
+            } catch (tokenError) {
+              console.log('Error obtaining pull token or checking tags with auth:', tokenError);
+              console.log('Failed to get token, default to latest tag');
+              core.setOutput('tag', 'latest');
+              return;
+            }
+
             // For develop branch, check which of 'staging' or 'latest' is newer in GHCR
             const headers = {
-              'Accept': 'application/vnd.oci.image.manifest.v1+json'
+              'Accept': 'application/vnd.oci.image.manifest.v1+json',
+              'Authorization': `Bearer ${token}`
             };
 
             try {
-              // Check if staging tag exists in GHCR
+              // Check if staging tag exists in GHCR (public registry, no auth)
               console.log('Checking for staging tag in GHCR...');
               const stagingRes = await fetch('https://ghcr.io/v2/sillsdev/app-builders/manifests/staging', { headers });
               console.log(`Staging tag response: ${stagingRes.status} ${stagingRes.statusText}`);
-              const stagingExists = stagingRes.status !== 404;
+              const stagingExists = stagingRes.status === 200;
               
-              // Check if latest tag exists in GHCR
+              // Check if latest tag exists in GHCR (public registry, no auth)
               console.log('Checking for latest tag in GHCR...');
               const latestRes = await fetch('https://ghcr.io/v2/sillsdev/app-builders/manifests/latest', { headers });
               console.log(`Latest tag response: ${latestRes.status} ${latestRes.statusText}`);
-              const latestExists = latestRes.status !== 404;
+              const latestExists = latestRes.status === 200;
 
               console.log(`Staging exists: ${stagingExists}, Latest exists: ${latestExists}`);
 
               if (stagingExists && latestExists) {
-                // Both tags exist, try to compare dates from GitHub package metadata
-                console.log('Both tags exist, attempting to compare dates...');
-                const token = context.token;
-                const pkgRes = await fetch('https://api.github.com/user/packages?package_type=container&per_page=10', { headers: { 'Authorization': `token ${token}` } });
-                console.log(`Package list response: ${pkgRes.status}`);
-                if (pkgRes.ok) {
-                  const packages = await pkgRes.json();
-                  const appBuilderspkg = packages.find(pkg => pkg.name === 'app-builders');
-                  if (appBuilderspkg) {
-                    const versionsRes = await fetch(`https://api.github.com/user/packages/container/app-builders/versions`, { headers: { 'Authorization': `token ${token}` } });
-                    console.log(`Versions response: ${versionsRes.status}`);
-                    if (versionsRes.ok) {
-                      const versions = await versionsRes.json();
-                      console.log(`Found ${versions.length} versions`);
-                      const staging = versions.find(v => v.name === 'staging');
-                      const latest = versions.find(v => v.name === 'latest');
-                      if (staging && latest) {
-                        const stagingDate = new Date(staging.updated_at);
-                        const latestDate = new Date(latest.updated_at);
-                        const selectedTag = stagingDate > latestDate ? 'staging' : 'latest';
-                        console.log(`Staging: ${stagingDate}, Latest: ${latestDate}, Selected: ${selectedTag}`);
-                        core.setOutput('tag', selectedTag);
-                        return;
-                      }
-                    }
+                // Both tags exist, compare their created dates
+                console.log('Both staging and latest tags found in GHCR, comparing creation dates...');
+                
+                // Helper to get created timestamp from a tag
+                async function getCreatedDate(tag) {
+                  console.log(`Fetching manifest for ${tag}...`);
+
+                  const manifestRes = await fetch(`https://ghcr.io/v2/sillsdev/app-builders/manifests/${tag}`,{ headers });
+
+                  if (!manifestRes.ok) {
+                    throw new Error(`Failed to fetch manifest for ${tag}: ${manifestRes.status}`);
                   }
+
+                  const manifest = await manifestRes.json();
+
+                  if (!manifest.config || !manifest.config.digest) {
+                    throw new Error(`No config digest found in manifest for ${tag}`);
+                  }
+
+                  const configDigest = manifest.config.digest;
+
+                  console.log(`Fetching config blob for ${tag}: ${configDigest}`);
+
+                  const configRes = await fetch(
+                    `https://ghcr.io/v2/sillsdev/app-builders/blobs/${configDigest}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                  );
+
+                  if (!configRes.ok) {
+                    throw new Error(`Failed to fetch config blob for ${tag}: ${configRes.status}`);
+                  }
+
+                  const config = await configRes.json();
+
+                  if (!config.created) {
+                    throw new Error(`No created timestamp found in config for ${tag}`);
+                  }
+
+                  return config.created;
                 }
-                // If we can't get dates, prefer staging
+
+                try {
+                  const stagingCreated = await getCreatedDate('staging');
+                  const latestCreated = await getCreatedDate('latest');
+
+                  console.log(`staging created: ${stagingCreated}`);
+                  console.log(`latest created:  ${latestCreated}`);
+
+                  // ISO timestamps sort lexicographically
+                  if (stagingCreated > latestCreated) {
+                    console.log('Staging image is newer — selecting staging');
+                    core.setOutput('tag', 'staging');
+                    return;
+                  }
+
+                  if (latestCreated > stagingCreated) {
+                    console.log('Latest image is newer — selecting latest');
+                    core.setOutput('tag', 'latest');
+                    return;
+                  }
+
+                  console.log('Created timestamps identical — falling through to default behavior');
+                } catch (compareError) {
+                  console.log('Failed to compare image creation dates:', compareError);
+                  console.log('Falling through to default staging preference');
+                }
+                
+                
                 console.log('Both staging and latest exist in GHCR, preferring staging');
                 core.setOutput('tag', 'staging');
               } else if (stagingExists) {

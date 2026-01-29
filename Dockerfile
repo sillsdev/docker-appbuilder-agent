@@ -1,4 +1,5 @@
-FROM --platform=linux/amd64 ghcr.io/sillsdev/app-builders:latest AS builder
+ARG BASE_IMAGE_TAG=latest
+FROM --platform=linux/amd64 ghcr.io/sillsdev/app-builders:${BASE_IMAGE_TAG} AS builder
 
 FROM --platform=linux/amd64 phusion/baseimage:jammy-1.0.1
 

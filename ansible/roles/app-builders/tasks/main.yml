@@ -10,6 +10,7 @@
     pkg:
       - android-sdk-installer
       - openjfx
+      - rsync
     #  - app-builders // changed to copying from ghcr.io/sillsdev/app-builders docker container
     state: latest
     update_cache: yes

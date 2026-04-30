@@ -34,12 +34,19 @@ jobs:
         id: meta
         run: |
           DOCKER_TAG=latest
-          if [[ "${GITHUB_HEAD_REF}" != "" ]]; then BRANCH="${GITHUB_HEAD_REF}"; else BRANCH="${GITHUB_REF_NAME}"; fi
-          case $BRANCH in develop) APP_ENV="stg" ;; master) APP_ENV="prd" ;; *) APP_ENV="stg" && DOCKER_TAG="${BRANCH/\//-}" ;; esac
-          echo "Branch=${BRANCH}"
+          if [[ "${{ github.event.inputs.base_image_tag }}" != "" ]]; then
+            # When custom base image tag is provided, use it as the output tag too
+            DOCKER_TAG="${{ github.event.inputs.base_image_tag }}"
+            APP_ENV="stg"
+          else
+            # Original logic for automatic builds
+            if [[ "${GITHUB_HEAD_REF}" != "" ]]; then BRANCH="${GITHUB_HEAD_REF}"; else BRANCH="${GITHUB_REF_NAME}"; fi
+            case $BRANCH in develop) APP_ENV="stg" ;; master) APP_ENV="prd" ;; *) APP_ENV="stg" && DOCKER_TAG="${BRANCH/\//-}" ;; esac
+          fi
+          echo "Branch=${BRANCH:-custom}"
           echo "DockerTag=${DOCKER_TAG}"
           echo "AppEnv=${APP_ENV}"
-          echo "Branch=${BRANCH}" >> $GITHUB_OUTPUT
+          echo "Branch=${BRANCH:-custom}" >> $GITHUB_OUTPUT
           echo "DockerTag=${DOCKER_TAG}" >> $GITHUB_OUTPUT
           echo "AppEnv=${APP_ENV}" >> $GITHUB_OUTPUT
 
@@ -251,6 +258,7 @@ jobs:
           echo "VersionTag=$(cat $HOME/out/VERSION)" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials (SIL)
+        if: ${{ github.event.inputs.base_image_tag == '' }}
         id: aws_sil
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -259,12 +267,14 @@ jobs:
           aws-region: ${{ secrets.SIL__AWS_DEFAULT_REGION }}
 
       - name: Login to AWS ECR (SIL)
+        if: ${{ github.event.inputs.base_image_tag == '' }}
         id: ecr_sil
         uses: aws-actions/amazon-ecr-login@v2
         with:
           registries: ${{ secrets.SIL__AWS_ECR_ACCOUNT }}
 
       - name: Push to AWS ECR (SIL)
+        if: ${{ github.event.inputs.base_image_tag == '' }}
         run: |
           docker tag ${{ env.BUILD_TAG }} "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
           docker tag ${{ env.BUILD_TAG }} "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
@@ -272,7 +282,7 @@ jobs:
           docker push "${{ steps.ecr_sil.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
 
       - name: Configure AWS credentials (FCBH)
-        if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
+        if: ${{ steps.meta.outputs.AppEnv == 'prd' && github.event.inputs.base_image_tag == '' }}
         id: aws_fcbh
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -281,14 +291,14 @@ jobs:
           aws-region: ${{ secrets.FCBH__AWS_DEFAULT_REGION }}
 
       - name: Login to AWS ECR (FCBH)
-        if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
+        if: ${{ steps.meta.outputs.AppEnv == 'prd' && github.event.inputs.base_image_tag == '' }}
         id: ecr_fcbh
         uses: aws-actions/amazon-ecr-login@v2
         with:
           registries: ${{ secrets.FCBH__AWS_ECR_ACCOUNT }}
 
       - name: Push to AWS ECR (FCBH)
-        if: ${{ steps.meta.outputs.AppEnv == 'prd' }}
+        if: ${{ steps.meta.outputs.AppEnv == 'prd' && github.event.inputs.base_image_tag == '' }}
         run: |
           docker tag ${{ env.BUILD_TAG }} "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
           docker tag ${{ env.BUILD_TAG }} "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
@@ -296,7 +306,7 @@ jobs:
           docker push "${{ steps.ecr_fcbh.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
 
       - name: Configure AWS credentials (LU)
-        if: ${{ steps.meta.outputs.AppEnv == 'stg' }}
+        if: ${{ steps.meta.outputs.AppEnv == 'stg' && github.event.inputs.base_image_tag == '' }}
         id: aws_lu
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -305,14 +315,14 @@ jobs:
           aws-region: ${{ secrets.LU__AWS_DEFAULT_REGION }}
 
       - name: Login to AWS ECR (LU)
-        if: ${{ steps.meta.outputs.AppEnv == 'stg' }}
+        if: ${{ steps.meta.outputs.AppEnv == 'stg' && github.event.inputs.base_image_tag == '' }}
         id: ecr_lu
         uses: aws-actions/amazon-ecr-login@v2
         with:
           registries: ${{ secrets.LU__AWS_ECR_ACCOUNT }}
 
       - name: Push to AWS ECR (LU)
-        if: ${{ steps.meta.outputs.AppEnv == 'stg' }}
+        if: ${{ steps.meta.outputs.AppEnv == 'stg' && github.event.inputs.base_image_tag == '' }}
         run: |
           docker tag ${{ env.BUILD_TAG }} "${{ steps.ecr_lu.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
           docker tag ${{ env.BUILD_TAG }} "${{ steps.ecr_lu.outputs.registry }}/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"

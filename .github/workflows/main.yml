@@ -11,6 +11,10 @@ on:
         default: "warning"
       tags:
         description: "Tags"
+      base_image_tag:
+        description: "Base image tag for app-builders (e.g. feature-xxx, staging, latest)"
+        required: false
+        default: ""
   schedule:
     - cron: "0 0 * * 0" # weekly
 
@@ -44,6 +48,14 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            // Check if base image tag was provided via workflow input
+            const inputTag = '${{ github.event.inputs.base_image_tag }}';
+            if (inputTag && inputTag.trim() !== '') {
+              core.setOutput('tag', inputTag.trim());
+              console.log(`Using workflow input base image tag: ${inputTag.trim()}`);
+              return;
+            }
+
             const branch = process.env.BRANCH;
             if (branch === 'master') {
               core.setOutput('tag', 'latest');

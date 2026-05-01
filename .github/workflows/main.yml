@@ -339,9 +339,13 @@ jobs:
       - name: Push to GHCR
         run: |
           docker tag ${{ env.BUILD_TAG }} "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
-          docker tag ${{ env.BUILD_TAG }} "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
           docker push "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.meta.outputs.DockerTag }}"
-          docker push "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+          
+          # Only push version tag for automatic builds (when base_image_tag is not specified)
+          if [[ "${{ github.event.inputs.base_image_tag }}" == "" ]]; then
+            docker tag ${{ env.BUILD_TAG }} "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+            docker push "ghcr.io/sillsdev/appbuilder-agent-${{ steps.meta.outputs.AppEnv }}:${{ steps.version.outputs.VersionTag }}"
+          fi
       - name: Cleanup older untagged packages, keep 2
         uses: actions/delete-package-versions@v5
         with:
